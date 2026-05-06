@@ -1,0 +1,41 @@
+# === IDE ===
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+
+# === OS ===
+.DS_Store
+Thumbs.db
+
+# === Backend (Spring Boot / Gradle) ===
+backend/build/
+backend/.gradle/
+backend/out/
+backend/uploads/
+backend/bin/
+
+# === Frontend (Next.js / Node) ===
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# === 환경 변수 (절대 커밋 금지) ===
+.env
+.env.local
+.env.*.local
+backend/src/main/resources/application-local.yml
+backend/src/main/resources/application-prod.yml
+
+# === 로그 ===
+*.log
+logs/
+
+# === 빌드 산출물 ===
+*.jar
+*.war
+*.class
+
+# === bkit ===
+.bkit/
