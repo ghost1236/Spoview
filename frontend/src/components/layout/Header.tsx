@@ -106,7 +106,6 @@ export function Header() {
 
       {/* 모바일 메뉴 */}
       {mobileOpen && (
-        {/* 모바일 드롭다운 메뉴 배경과 상단 구분선을 CSS 변수로 지정해요 */}
         <div className="sm:hidden px-4 py-3 space-y-1 border-t" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
           {navItems.map((item) => (
             <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)}

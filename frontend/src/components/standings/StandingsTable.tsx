@@ -94,7 +94,6 @@ export function StandingsTable({ standings, sportType, highlightTeamCodes = [] }
       </div>
 
       {zones.length > 0 && (
-        {/* 존(강등권/챔피언스리그 등) 범례 영역 — 상단 구분선을 CSS 변수로 지정해요 */}
         <div className="flex flex-wrap gap-3 mt-3 pt-3 border-t" style={{ borderColor: "var(--border)" }}>
           {zones.map((z) => {
             const zone = ZONE_COLORS[z];

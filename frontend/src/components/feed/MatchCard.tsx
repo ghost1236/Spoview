@@ -37,7 +37,6 @@ export function MatchCard({ match }: Props) {
               {match.homeScore} - {match.awayScore}
             </div>
           ) : (
-            {/* 예정 경기일 때 "vs" 텍스트도 CSS 변수(3차 텍스트 색)로 처리해요 */}
             <div className="text-xs" style={{ color: "var(--text-tertiary)" }}>vs</div>
           )}
         </div>
