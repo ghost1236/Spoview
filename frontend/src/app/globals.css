@@ -1,0 +1,154 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* ─── Spoview Design System Tokens ─── */
+@layer base {
+  :root {
+    --brand-primary: #1F3FCC;
+    --brand-primary-hover: #1832A8;
+    --brand-accent: #FFC634;
+    --brand-deep: #0E1E66;
+    --c-kbo: #D72631;
+    --c-kleague: #1F8A4D;
+    --c-epl: #3D195B;
+    --c-laliga: #EE3325;
+    --c-bundesliga: #D20515;
+    --zone-champions: #1F3FCC;
+    --zone-europa: #FF8A00;
+    --zone-conference: #00B388;
+    --zone-relegation: #E11D48;
+    --bg: #F7F8FB;
+    --surface: #FFFFFF;
+    --surface-2: #F1F3F8;
+    --border: #E5E7EF;
+    --border-strong: #D5D9E3;
+    --text: #0E1430;
+    --text-secondary: #5B6379;
+    --text-tertiary: #8A92A6;
+    --shadow: 0 1px 2px rgba(14,20,48,0.04), 0 4px 12px rgba(14,20,48,0.04);
+    --shadow-lg: 0 4px 16px rgba(14,20,48,0.06), 0 16px 40px rgba(14,20,48,0.08);
+  }
+
+  [data-theme="dark"] {
+    --bg: #0A0E1F;
+    --surface: #131830;
+    --surface-2: #1B2140;
+    --border: #262C4A;
+    --border-strong: #353C5E;
+    --text: #F2F4FB;
+    --text-secondary: #A0A8C0;
+    --text-tertiary: #6E7693;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,0.4), 0 16px 40px rgba(0,0,0,0.5);
+    --brand-primary: #5277FF;
+    --brand-primary-hover: #6A8AFF;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0; padding: 0;
+    font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "tnum" 1;
+    transition: background 0.2s ease, color 0.2s ease;
+    font-size: 16px;
+    line-height: 1.55;
+  }
+
+  button { font-family: inherit; cursor: pointer; color: inherit; }
+  a { color: inherit; text-decoration: none; }
+  h1, h2, h3, h4 { margin: 0; letter-spacing: -0.02em; color: inherit; }
+  input, textarea, select { color: var(--text); }
+  p { color: inherit; }
+}
+
+/* ─── Spoview Components ─── */
+@layer components {
+  .sv-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+  }
+  .sv-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px; border-radius: 999px;
+    background: var(--surface-2); color: var(--text-secondary);
+    font-size: 13px; font-weight: 500;
+    border: 1px solid transparent; white-space: nowrap;
+    transition: all 0.15s; cursor: pointer;
+  }
+  .sv-chip.active, .sv-chip:hover.active {
+    background: var(--brand-primary); color: white;
+    border-color: var(--brand-primary);
+  }
+  .sv-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 10px 18px; border-radius: 10px;
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--text); font-size: 14px; font-weight: 600;
+    transition: all 0.15s;
+  }
+  .sv-btn:hover { background: var(--surface-2); }
+  .sv-btn-primary {
+    background: var(--brand-primary); border-color: var(--brand-primary); color: white;
+  }
+  .sv-btn-primary:hover { background: var(--brand-primary-hover); }
+  .form-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 6px;
+    font-size: 11px; font-weight: 800; color: white;
+  }
+  .form-W { background: #16A34A; }
+  .form-D { background: #94A3B8; }
+  .form-L { background: #DC2626; }
+  .live-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 8px; border-radius: 6px;
+    background: #DC2626; color: white;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+  }
+  .live-badge::before {
+    content: ''; width: 6px; height: 6px; border-radius: 999px;
+    background: white; animation: sv-pulse 1.5s infinite;
+  }
+  .zone-bar { width: 4px; height: 24px; border-radius: 2px; }
+  .team-logo {
+    width: 36px; height: 36px; border-radius: 999px;
+    background: var(--surface-2); color: var(--text-secondary);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 12px; flex-shrink: 0;
+    border: 1px solid var(--border);
+  }
+  .h-eyebrow {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+  .tabular { font-variant-numeric: tabular-nums; }
+
+  /* Legacy compat */
+  .card { @apply sv-card; }
+  .gradient-accent { background: linear-gradient(135deg, var(--brand-primary), var(--brand-deep)); }
+  .gradient-card { background: linear-gradient(135deg, rgba(31,63,204,0.04), rgba(14,30,102,0.02)); }
+}
+
+@layer utilities {
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+}
+
+@keyframes sv-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 8px; }

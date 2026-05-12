@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<script>(function(){try{var t=localStorage.getItem('spoview-theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}})();</script>
+<title>Spoview · 팀</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css" rel="stylesheet">
+<link rel="stylesheet" href="ref-styles.css" />
+<style>
+  :root {
+    --accent: var(--brand-primary);
+    --accent-soft: var(--text-secondary);
+    --positive: #16A34A;
+    --negative: #DC2626;
+    --density-pad: 20px;
+    --density-card-radius: 14px;
+  }
+  body { background: var(--bg); }
+
+  /* Layout — same as home.html */
+  .page {
+    display: grid; grid-template-columns: 240px 1fr;
+    max-width: 1240px; margin: 0 auto; min-height: 100vh;
+  }
+  .sidebar {
+    border-right: 1px solid var(--border);
+    padding: 24px 16px; position: sticky; top: 0;
+    height: 100vh; overflow-y: auto;
+  }
+  .main { padding: 32px 40px 80px; min-width: 0; }
+
+  .brand {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 18px; font-weight: 800;
+    letter-spacing: -0.02em; margin-bottom: 28px; padding: 0 8px;
+    color: var(--text);
+  }
+
+  .side-section { margin-bottom: 28px; }
+  .side-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+    color: var(--text-tertiary); text-transform: uppercase;
+    padding: 0 8px; margin-bottom: 8px;
+  }
+  .side-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 10px; border-radius: 8px;
+    font-size: 14px; font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer; transition: all 0.15s;
+  }
+  .side-item:hover { background: var(--surface-2); color: var(--text); }
+  .side-item.active {
+    background: var(--accent); color: #fff; font-weight: 600;
+    box-shadow: 0 4px 14px rgba(30,64,175,0.25);
+  }
+
+  .team-mono {
+    width: 28px; height: 28px; border-radius: 999px;
+    background: var(--team-color, var(--surface-2));
+    color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 9px; flex-shrink: 0;
+    letter-spacing: -0.02em;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15), inset 0 -2px 0 rgba(0,0,0,0.12);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+  }
+  .team-mono.lg { width: 44px; height: 44px; font-size: 11px; }
+  .team-mono.xxl { width: 88px; height: 88px; font-size: 18px; border-radius: 20px; }
+
+  /* Topbar */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .icon-btn {
+    width: 36px; height: 36px; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--surface);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--text-secondary); transition: all 0.15s;
+  }
+  .icon-btn:hover { background: var(--surface-2); color: var(--text); }
+
+  /* Hero */
+  .team-hero {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px; padding: 28px;
+    display: flex; gap: 24px; align-items: center;
+    position: relative; overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .team-hero::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 6px; background: var(--team-color);
+  }
+  .hero-info { flex: 1; min-width: 0; }
+  .hero-league {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--text-tertiary);
+    margin-bottom: 6px;
+  }
+  .hero-name {
+    font-size: 32px; font-weight: 800; letter-spacing: -0.025em;
+    margin: 0 0 10px;
+  }
+  .hero-meta { display: flex; gap: 18px; font-size: 13px; color: var(--text-secondary); }
+  .hero-meta strong { color: var(--text); font-weight: 700; }
+
+  .follow-btn {
+    padding: 12px 22px; border-radius: 12px; font-weight: 700; font-size: 14px;
+    background: var(--text); color: var(--surface); border: none; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .follow-btn.active {
+    background: var(--surface); color: var(--text);
+    border: 1px solid var(--border-strong);
+  }
+  .follow-btn:hover { transform: translateY(-1px); }
+
+  /* Tabs */
+  .tabs {
+    display: flex; gap: 4px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .tab {
+    padding: 12px 18px; border: none; background: none; cursor: pointer;
+    font-size: 14px; font-weight: 600; color: var(--text-secondary);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px; transition: all 0.15s;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--text); border-bottom-color: var(--team-color); font-weight: 700; }
+
+  /* Stat grid */
+  .stat-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 12px; margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--density-card-radius); padding: var(--density-pad);
+  }
+  .stat-eyebrow {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--text-tertiary);
+    margin-bottom: 8px;
+  }
+  .stat-num {
+    font-size: 28px; font-weight: 800; letter-spacing: -0.025em;
+    font-variant-numeric: tabular-nums; line-height: 1;
+  }
+  .stat-suffix { font-size: 12px; color: var(--text-tertiary); margin-left: 3px; font-weight: 600; }
+
+  /* Section */
+  .section-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin: 32px 0 14px;
+  }
+  .section-head:first-child { margin-top: 0; }
+  .section-head h2 { font-size: 18px; font-weight: 700; letter-spacing: -0.015em; margin: 0; }
+  .section-head .more { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--density-card-radius); padding: var(--density-pad);
+  }
+
+  /* Match list */
+  .match {
+    display: grid; grid-template-columns: 80px 1fr auto 1fr 70px;
+    gap: 14px; align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .match:last-child { border-bottom: none; }
+  .m-date { font-size: 12px; color: var(--text-tertiary); font-weight: 600; }
+  .m-team { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .m-team.away { flex-direction: row-reverse; text-align: right; justify-content: flex-end; }
+  .m-name { font-weight: 700; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .m-name.muted { color: var(--text-secondary); font-weight: 600; }
+  .m-score {
+    font-size: 18px; font-weight: 800; letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums; min-width: 60px; text-align: center;
+  }
+  .m-result {
+    font-size: 11px; font-weight: 800; letter-spacing: 0.05em;
+    width: 20px; height: 20px; border-radius: 4px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: #fff;
+  }
+  .m-result.W { background: #16A34A; }
+  .m-result.D { background: #94A3B8; }
+  .m-result.L { background: #DC2626; }
+  .m-result.up { background: transparent; color: var(--text-tertiary); font-weight: 700; font-size: 12px; }
+
+  /* Squad table */
+  .squad-row {
+    display: grid; grid-template-columns: 32px 44px 1fr 80px 60px 60px 60px;
+    gap: 14px; align-items: center;
+    padding: 10px 8px;
+    font-size: 13px; border-bottom: 1px solid var(--border);
+  }
+  .squad-row.head {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.05em;
+    color: var(--text-tertiary); text-transform: uppercase;
+  }
+  .squad-row:last-child { border-bottom: none; }
+  .squad-row .num {
+    font-weight: 800; color: var(--text-tertiary);
+    font-variant-numeric: tabular-nums; text-align: center;
+  }
+  .squad-row .pos {
+    font-size: 11px; font-weight: 700; padding: 2px 6px;
+    border-radius: 4px; background: var(--surface-2);
+    color: var(--text-secondary); display: inline-block;
+    text-align: center;
+  }
+  .squad-row .nm { font-weight: 700; }
+  .squad-row .num-val { font-variant-numeric: tabular-nums; font-weight: 700; text-align: right; }
+
+  /* Two-col */
+  .two-col {
+    display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px;
+  }
+
+  /* Bars */
+  .bars {
+    display: grid; grid-template-columns: repeat(6, 1fr);
+    gap: 10px; height: 140px; align-items: end;
+  }
+  .bar-col { display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; }
+  .bar-stack { display: flex; flex-direction: column; justify-content: end; gap: 2px; width: 100%; height: 100%; }
+  .bar-gf { background: var(--brand-primary); border-radius: 4px 4px 0 0; min-height: 4px; }
+  .bar-ga { background: var(--brand-accent); border-radius: 4px 4px 0 0; min-height: 4px; }
+  .bar-label { font-size: 10px; color: var(--text-tertiary); font-weight: 600; }
+
+  /* Form badges */
+  .fb {
+    width: 22px; height: 22px; border-radius: 5px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800; color: #fff;
+  }
+  .fb-W { background: #16A34A; }
+  .fb-D { background: #94A3B8; }
+  .fb-L { background: #DC2626; }
+
+  /* Standing row */
+  .st-row {
+    display: grid; grid-template-columns: 24px 24px 1fr auto auto;
+    gap: 12px; align-items: center;
+    padding: 10px 4px; font-size: 13px;
+    border-bottom: 1px solid var(--border);
+  }
+  .st-row:last-child { border-bottom: none; }
+  .st-row.me {
+    margin: 0 -8px; padding-left: 8px; padding-right: 8px;
+    background: var(--surface-2); border-radius: 8px;
+    border-bottom: 1px solid transparent;
+  }
+  .st-row .rk { font-weight: 700; color: var(--text-secondary); }
+  .st-row.me .rk { color: var(--text); }
+  .st-row .nm { font-weight: 600; }
+  .st-row.me .nm { font-weight: 800; }
+  .st-row .pts { font-weight: 800; text-align: right; min-width: 30px; font-variant-numeric: tabular-nums; }
+  .st-row .rec { color: var(--text-tertiary); font-size: 12px; font-variant-numeric: tabular-nums; }
+
+  /* Mobile */
+  @media (max-width: 900px) {
+    .page { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .main { padding: 20px 16px 80px; }
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    .two-col { grid-template-columns: 1fr; }
+    .hero-name { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script src="ref-data.js"></script>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useMemo } = React;
+const D = window.SpoviewData;
+const { TEAMS, MY_TEAMS, MATCHES, STANDINGS_EPL, STANDINGS_KBO, TOT_RECENT } = D;
+
+const LEAGUE_NAME = { epl: 'EPL', laliga: '라리가', bundesliga: '분데스리가', kleague: 'K리그', kbo: 'KBO' };
+
+// Get team code from URL ?team=tot, default tot
+const params = new URLSearchParams(location.search);
+const TEAM_CODE = params.get('team') && TEAMS[params.get('team')] ? params.get('team') : 'tot';
+
+function TeamMono({ code, size = 'sm' }) {
+  const t = TEAMS[code];
+  if (!t) return null;
+  const cls = size === 'lg' ? 'team-mono lg' : size === 'xxl' ? 'team-mono xxl' : 'team-mono';
+  return <span className={cls} title={t.name} style={{ '--team-color': t.color }}>{t.initial}</span>;
+}
+
+function FormRow({ form }) {
+  return (
+    <span style={{ display: 'inline-flex', gap: 4 }}>
+      {form.split('').map((c, i) => <span key={i} className={`fb fb-${c}`}>{c}</span>)}
+    </span>
+  );
+}
+
+/* ─── Mock squad ─── */
+const SQUAD_TOT = [
+  { num: 7, name: '손흥민', pos: 'FW', age: 32, app: 35, goal: 18, ast: 8 },
+  { num: 9, name: '히샬리송', pos: 'FW', age: 28, app: 28, goal: 9, ast: 4 },
+  { num: 10, name: '매디슨', pos: 'MF', age: 28, app: 30, goal: 7, ast: 11 },
+  { num: 8, name: '벤탕쿠르', pos: 'MF', age: 28, app: 26, goal: 2, ast: 3 },
+  { num: 30, name: '베르흐베인', pos: 'MF', age: 23, app: 32, goal: 5, ast: 6 },
+  { num: 6, name: '로메로', pos: 'DF', age: 27, app: 31, goal: 3, ast: 1 },
+  { num: 17, name: '판더펜', pos: 'DF', age: 25, app: 29, goal: 1, ast: 2 },
+  { num: 23, name: '페드로 포로', pos: 'DF', age: 25, app: 33, goal: 4, ast: 7 },
+  { num: 1, name: '비카리오', pos: 'GK', age: 30, app: 35, goal: 0, ast: 0 },
+];
+
+const TEAM_STATS_TOT = [
+  { label: '리그 순위', value: '5', suffix: '위' },
+  { label: '경기수', value: '35', suffix: '경기' },
+  { label: '득점', value: '70', suffix: '골' },
+  { label: '실점', value: '50', suffix: '골' },
+];
+const TEAM_STATS_DETAIL_TOT = [
+  { label: '점유율', value: 58, max: 100, unit: '%' },
+  { label: '경기당 슈팅', value: 14.2, max: 20, unit: '' },
+  { label: '경기당 패스', value: 542, max: 700, unit: '' },
+  { label: '패스 성공률', value: 84, max: 100, unit: '%' },
+  { label: '클린시트', value: 9, max: 20, unit: '경기' },
+  { label: '코너킥/경기', value: 6.4, max: 10, unit: '' },
+];
+
+function StatBar({ value, max }) {
+  const pct = Math.min(100, (value / max) * 100);
+  return (
+    <div style={{ height: 6, borderRadius: 3, background: 'var(--surface-2)', overflow: 'hidden', marginTop: 6 }}>
+      <div style={{ width: `${pct}%`, height: '100%', background: 'var(--team-color)', borderRadius: 3 }} />
+    </div>
+  );
+}
+
+function App() {
+  const [theme, setTheme] = useState('light');
+  const [tab, setTab] = useState('overview');
+  const [following, setFollowing] = useState(MY_TEAMS.includes(TEAM_CODE));
+  useEffect(() => { document.documentElement.dataset.theme = theme; }, [theme]);
+
+  const team = TEAMS[TEAM_CODE];
+  const isFootball = team.league !== 'kbo';
+  const standings = team.league === 'epl' ? STANDINGS_EPL :
+                    team.league === 'kbo' ? STANDINGS_KBO : null;
+  const myStanding = standings?.find(s => s.team === TEAM_CODE);
+
+  const teamFinished = MATCHES.filter(m => (m.home === TEAM_CODE || m.away === TEAM_CODE) && m.status === 'finished');
+  const teamUpcoming = MATCHES.filter(m => (m.home === TEAM_CODE || m.away === TEAM_CODE) && m.status !== 'finished');
+
+  return (
+    <div className="page" style={{ '--team-color': team.color }}>
+      {/* Sidebar */}
+      <aside className="sidebar">
+        <div className="brand">
+          <svg width="28" height="28" viewBox="0 0 32 32" style={{ display: 'block', flexShrink: 0 }}>
+            <rect x="0" y="0" width="32" height="32" rx="8" fill="var(--brand-primary)" />
+            <path d="M 8 12 A 8 8 0 0 1 22 12" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+            <path d="M 10 22 A 8 8 0 0 0 24 22" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+            <circle cx="16" cy="16" r="2.5" fill="var(--brand-accent)" />
+          </svg>
+          <span>Spoview</span>
+        </div>
+
+        <div className="side-section">
+          <div className="side-label">메뉴</div>
+          <a className="side-item" href="home.html">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-5h-2v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+            홈
+          </a>
+          <button className="side-item active" style={{ width: '100%', border: 'none', textAlign: 'left', cursor: 'default' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span style={{ flex: 1 }}>내 팀</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div style={{ marginLeft: 12, paddingLeft: 14, borderLeft: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 2, marginTop: 4, marginBottom: 4 }}>
+            {MY_TEAMS.map(c => (
+              <a key={c} className={`side-item ${c === TEAM_CODE ? 'active' : ''}`} href={`team.html?team=${c}`} style={{ padding: '6px 10px' }}>
+                <TeamMono code={c} />
+                <span style={{ flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{TEAMS[c].short}</span>
+              </a>
+            ))}
+            <a className="side-item" href="onboarding.html" style={{ color: 'var(--text-secondary)', padding: '6px 10px' }}>
+              <span className="team-mono" style={{
+                background: 'transparent', border: '1px dashed currentColor',
+                color: 'var(--text-secondary)', textShadow: 'none', opacity: 0.7,
+              }}>+</span>
+              팀 추가
+            </a>
+          </div>
+          <a className="side-item" href="community.html">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            커뮤니티
+          </a>
+        </div>
+      </aside>
+
+      {/* Main */}
+      <main className="main">
+        {/* Topbar */}
+        <div className="topbar">
+          <div style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>
+            <a href="home.html" style={{ color: 'inherit' }}>홈</a> · <span style={{ color: 'var(--text)', fontWeight: 600 }}>{team.short}</span>
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="icon-btn" title="검색">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            </button>
+            <button className="icon-btn" onClick={() => setTheme(t => t === 'light' ? 'dark' : 'light')} title="테마">
+              {theme === 'light' ? (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Hero */}
+        <div className="team-hero">
+          <TeamMono code={TEAM_CODE} size="xxl" />
+          <div className="hero-info">
+            <div className="hero-league">{LEAGUE_NAME[team.league]} · {isFootball ? '축구' : '야구'}</div>
+            <h1 className="hero-name">{team.name}</h1>
+            <div className="hero-meta">
+              {myStanding ? (
+                <>
+                  <span><strong>{myStanding.rank}</strong>위</span>
+                  <span>{isFootball ? `${myStanding.W}승 ${myStanding.D}무 ${myStanding.L}패` : `${myStanding.W}승 ${myStanding.L}패 ${myStanding.T||0}무`}</span>
+                  <span>{isFootball ? `${myStanding.Pts}점` : `승률 ${myStanding.pct}`}</span>
+                </>
+              ) : (
+                <span>2025/26 시즌</span>
+              )}
+            </div>
+          </div>
+          <button className={`follow-btn ${following ? 'active' : ''}`} onClick={() => setFollowing(f => !f)}>
+            {following ? '✓ 팔로잉' : '+ 팔로우'}
+          </button>
+        </div>
+
+        {/* Tabs */}
+        <div className="tabs">
+          {[
+            { id: 'overview', label: '개요' },
+            { id: 'fixtures', label: '일정 · 결과' },
+            { id: 'squad',    label: '선수단' },
+            { id: 'stats',    label: '통계' },
+          ].map(t => (
+            <button key={t.id} className={`tab ${tab === t.id ? 'active' : ''}`} onClick={() => setTab(t.id)}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {/* OVERVIEW */}
+        {tab === 'overview' && (
+          <>
+            <div className="stat-grid">
+              {TEAM_STATS_TOT.map(s => (
+                <div key={s.label} className="stat-card">
+                  <div className="stat-eyebrow">{s.label}</div>
+                  <div>
+                    <span className="stat-num">{s.value}</span>
+                    <span className="stat-suffix">{s.suffix}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="two-col">
+              <div>
+                <div className="section-head"><h2>다가오는 경기</h2></div>
+                <div className="card">
+                  {teamUpcoming.length === 0 ? (
+                    <div style={{ color: 'var(--text-tertiary)', fontSize: 13, padding: '20px 0', textAlign: 'center' }}>예정된 경기가 없어요</div>
+                  ) : teamUpcoming.map(m => {
+                    const home = TEAMS[m.home], away = TEAMS[m.away];
+                    return (
+                      <div key={m.id} className="match">
+                        <span className="m-date">{m.date}</span>
+                        <div className="m-team">
+                          <TeamMono code={m.home} />
+                          <span className={`m-name ${m.home !== TEAM_CODE ? 'muted' : ''}`}>{home.short}</span>
+                        </div>
+                        <span className="m-score">
+                          {m.status === 'live' ? `${m.homeScore} : ${m.awayScore}` : <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>VS</span>}
+                        </span>
+                        <div className="m-team away">
+                          <TeamMono code={m.away} />
+                          <span className={`m-name ${m.away !== TEAM_CODE ? 'muted' : ''}`}>{away.short}</span>
+                        </div>
+                        <span style={{ fontSize: 11, color: m.status === 'live' ? 'var(--negative)' : 'var(--text-tertiary)', fontWeight: 700, textAlign: 'right' }}>
+                          {m.status === 'live' ? `LIVE ${m.minute}` : LEAGUE_NAME[m.league]}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="section-head"><h2>최근 경기</h2></div>
+                <div className="card">
+                  {teamFinished.map(m => {
+                    const home = TEAMS[m.home], away = TEAMS[m.away];
+                    const isHome = m.home === TEAM_CODE;
+                    const won = (isHome && m.homeScore > m.awayScore) || (!isHome && m.awayScore > m.homeScore);
+                    const tied = m.homeScore === m.awayScore;
+                    return (
+                      <div key={m.id} className="match">
+                        <span className="m-date">{m.date}</span>
+                        <div className="m-team">
+                          <TeamMono code={m.home} />
+                          <span className={`m-name ${m.home !== TEAM_CODE ? 'muted' : ''}`}>{home.short}</span>
+                        </div>
+                        <span className="m-score">{m.homeScore} : {m.awayScore}</span>
+                        <div className="m-team away">
+                          <TeamMono code={m.away} />
+                          <span className={`m-name ${m.away !== TEAM_CODE ? 'muted' : ''}`}>{away.short}</span>
+                        </div>
+                        <span className={`m-result ${won ? 'W' : tied ? 'D' : 'L'}`}>{won ? 'W' : tied ? 'D' : 'L'}</span>
+                      </div>
+                    );
+                  })}
+                  {/* fill with mock */}
+                  {[
+                    { date: '4/28', opp: 'che', isHome: true, mine: 2, opps: 1, r: 'W' },
+                    { date: '4/22', opp: 'liv', isHome: false, mine: 1, opps: 2, r: 'L' },
+                    { date: '4/15', opp: 'bha', isHome: true, mine: 2, opps: 2, r: 'D' },
+                    { date: '4/8',  opp: 'new', isHome: false, mine: 4, opps: 1, r: 'W' },
+                  ].map((m, i) => {
+                    const opp = TEAMS[m.opp];
+                    if (!opp) return null;
+                    return (
+                      <div key={'h'+i} className="match">
+                        <span className="m-date">{m.date}</span>
+                        <div className="m-team">
+                          <TeamMono code={m.isHome ? TEAM_CODE : m.opp} />
+                          <span className={`m-name ${!m.isHome ? 'muted' : ''}`}>{m.isHome ? team.short : opp.short}</span>
+                        </div>
+                        <span className="m-score">{m.isHome ? m.mine : m.opps} : {m.isHome ? m.opps : m.mine}</span>
+                        <div className="m-team away">
+                          <TeamMono code={m.isHome ? m.opp : TEAM_CODE} />
+                          <span className={`m-name ${m.isHome ? 'muted' : ''}`}>{m.isHome ? opp.short : team.short}</span>
+                        </div>
+                        <span className={`m-result ${m.r}`}>{m.r}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <div className="section-head"><h2>리그 순위</h2></div>
+                <div className="card">
+                  {standings ? standings.slice(0, 8).map(r => (
+                    <div key={r.team} className={`st-row ${r.highlight ? 'me' : ''}`}>
+                      <span className="rk">{r.rank}</span>
+                      <TeamMono code={r.team} />
+                      <span className="nm">{TEAMS[r.team].short}</span>
+                      <span className="rec">{isFootball ? `${r.W}-${r.D}-${r.L}` : `${r.W}-${r.L}`}</span>
+                      <span className="pts">{isFootball ? r.Pts : r.pct}</span>
+                    </div>
+                  )) : (
+                    <div style={{ color: 'var(--text-tertiary)', padding: 12, fontSize: 13 }}>이 리그의 순위표는 준비중입니다.</div>
+                  )}
+                </div>
+
+                <div className="section-head"><h2>최근 폼</h2></div>
+                <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <FormRow form={myStanding?.form || 'WLWDW'} />
+                  <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>최근 5경기 · {(myStanding?.form || 'WLWDW').split('').filter(c => c === 'W').length}승</div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* FIXTURES */}
+        {tab === 'fixtures' && (
+          <>
+            <div className="section-head"><h2>2025/26 시즌 일정</h2></div>
+            <div className="card">
+              {[
+                ...teamUpcoming.map(m => ({ ...m, kind: 'upcoming' })),
+                ...teamFinished.map(m => ({ ...m, kind: 'finished' })),
+                { id: 'h1', kind: 'finished', date: '4/28', home: TEAM_CODE, away: 'che', homeScore: 2, awayScore: 1, league: team.league },
+                { id: 'h2', kind: 'finished', date: '4/22', home: 'liv', away: TEAM_CODE, homeScore: 2, awayScore: 1, league: team.league },
+                { id: 'h3', kind: 'finished', date: '4/15', home: TEAM_CODE, away: 'bha', homeScore: 2, awayScore: 2, league: team.league },
+                { id: 'h4', kind: 'finished', date: '4/8',  home: 'new', away: TEAM_CODE, homeScore: 1, awayScore: 4, league: team.league },
+                { id: 'u1', kind: 'upcoming', date: '5/12', home: TEAM_CODE, away: 'mun', league: team.league, status: 'scheduled' },
+                { id: 'u2', kind: 'upcoming', date: '5/19', home: 'mci', away: TEAM_CODE, league: team.league, status: 'scheduled' },
+              ].map((m, i) => {
+                const home = TEAMS[m.home], away = TEAMS[m.away];
+                if (!home || !away) return null;
+                const isFinished = m.kind === 'finished';
+                let result = null;
+                if (isFinished) {
+                  const isHome = m.home === TEAM_CODE;
+                  const won = (isHome && m.homeScore > m.awayScore) || (!isHome && m.awayScore > m.homeScore);
+                  const tied = m.homeScore === m.awayScore;
+                  result = won ? 'W' : tied ? 'D' : 'L';
+                }
+                return (
+                  <div key={m.id || i} className="match">
+                    <span className="m-date">{m.date}</span>
+                    <div className="m-team">
+                      <TeamMono code={m.home} />
+                      <span className={`m-name ${m.home !== TEAM_CODE ? 'muted' : ''}`}>{home.short}</span>
+                    </div>
+                    <span className="m-score">
+                      {isFinished ? `${m.homeScore} : ${m.awayScore}` : <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>VS</span>}
+                    </span>
+                    <div className="m-team away">
+                      <TeamMono code={m.away} />
+                      <span className={`m-name ${m.away !== TEAM_CODE ? 'muted' : ''}`}>{away.short}</span>
+                    </div>
+                    {result ? <span className={`m-result ${result}`}>{result}</span> : <span className="m-result up">예정</span>}
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
+
+        {/* SQUAD */}
+        {tab === 'squad' && (
+          <>
+            <div className="section-head"><h2>선수단 ({SQUAD_TOT.length}명)</h2></div>
+            <div className="card" style={{ padding: '8px 12px' }}>
+              <div className="squad-row head">
+                <span style={{ textAlign: 'center' }}>#</span>
+                <span>포지션</span>
+                <span>이름</span>
+                <span style={{ textAlign: 'right' }}>나이</span>
+                <span style={{ textAlign: 'right' }}>{isFootball ? '경기' : '경기'}</span>
+                <span style={{ textAlign: 'right' }}>{isFootball ? '득점' : '타율'}</span>
+                <span style={{ textAlign: 'right' }}>{isFootball ? '도움' : '홈런'}</span>
+              </div>
+              {SQUAD_TOT.map(p => (
+                <div key={p.num} className="squad-row">
+                  <span className="num">{p.num}</span>
+                  <span><span className="pos">{p.pos}</span></span>
+                  <span className="nm">{p.name}</span>
+                  <span className="num-val">{p.age}</span>
+                  <span className="num-val">{p.app}</span>
+                  <span className="num-val">{p.goal}</span>
+                  <span className="num-val">{p.ast}</span>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* STATS */}
+        {tab === 'stats' && (
+          <>
+            <div className="section-head"><h2>최근 6경기 득실</h2></div>
+            <div className="card">
+              <div className="bars">
+                {TOT_RECENT.map((d, i) => {
+                  const max = Math.max(...TOT_RECENT.flatMap(x => [x.GF, x.GA]));
+                  return (
+                    <div key={i} className="bar-col">
+                      <div className="bar-stack">
+                        <div className="bar-gf" style={{ height: `${(d.GF / max) * 100}%` }} title={`득점 ${d.GF}`}></div>
+                        <div className="bar-ga" style={{ height: `${(d.GA / max) * 100}%` }} title={`실점 ${d.GA}`}></div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 10, marginTop: 8 }}>
+                {TOT_RECENT.map((d, i) => (
+                  <div key={i} className="bar-label" style={{ textAlign: 'center' }}>{d.match}</div>
+                ))}
+              </div>
+              <div style={{ display: 'flex', gap: 16, marginTop: 16, fontSize: 12 }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ width: 12, height: 12, borderRadius: 3, background: 'var(--brand-primary)' }} /> 득점
+                </span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ width: 12, height: 12, borderRadius: 3, background: 'var(--brand-accent)' }} /> 실점
+                </span>
+              </div>
+            </div>
+
+            <div className="section-head"><h2>세부 지표</h2></div>
+            <div className="card">
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 24 }}>
+                {TEAM_STATS_DETAIL_TOT.map(s => (
+                  <div key={s.label}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                      <span style={{ fontSize: 13, color: 'var(--text-secondary)', fontWeight: 600 }}>{s.label}</span>
+                      <span style={{ fontSize: 16, fontWeight: 800, fontVariantNumeric: 'tabular-nums' }}>
+                        {s.value}<span style={{ fontSize: 11, color: 'var(--text-tertiary)', marginLeft: 2 }}>{s.unit}</span>
+                      </span>
+                    </div>
+                    <StatBar value={s.value} max={s.max} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+      </main>
+    </div>
+  );
+}
+
+(function waitDeps(){
+  if (!window.SpoviewData) return setTimeout(waitDeps, 30);
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+})();
+</script>
+</body>
+</html>
