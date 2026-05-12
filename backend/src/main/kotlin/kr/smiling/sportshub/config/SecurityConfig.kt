@@ -66,6 +66,8 @@ class SecurityConfig(
     fun corsConfigurationSource(): CorsConfigurationSource {
         val config = CorsConfiguration().apply {
             allowedOriginPatterns = listOf(
+                "https://spoview.kr",
+                "https://www.spoview.kr",
                 "https://smiling.kr",
                 "https://*.smiling.kr",
                 "https://*.vercel.app",

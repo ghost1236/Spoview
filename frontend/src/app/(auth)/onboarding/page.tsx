@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { getLeagues, getTeams, type League, type Team } from "@/lib/api";
+import { getLeagues, getTeams, subscribe, type League, type Team } from "@/lib/api";
 import { useAppStore } from "@/lib/store";
 import { useUser } from "@/lib/useUser";
 import { getTeamColor } from "@/lib/teamColors";
@@ -21,7 +21,7 @@ const NOTIF_OPTIONS = [
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { ready, isLoggedIn } = useUser();
+  const { ready, isLoggedIn, token } = useUser();
   const { addSubscription, setCurrentUserId } = useAppStore();
 
   const [stepIdx, setStepIdx] = useState(0);
@@ -72,7 +72,12 @@ export default function OnboardingPage() {
   }, [selectedLeagues]);
 
   const handleComplete = async () => {
-    selectedTeams.forEach(t => addSubscription(t));
+    for (const t of selectedTeams) {
+      addSubscription(t);
+      if (token) {
+        try { await subscribe(token, t.teamCode); } catch {}
+      }
+    }
     // Save notification settings
     const { setNotifSettings, setNotifPermission } = useAppStore.getState();
     setNotifSettings({

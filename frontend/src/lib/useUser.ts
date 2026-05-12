@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useAppStore } from "./store";
+import { getSubscriptions } from "./api";
 
 export function useUser() {
   const { data: session, status } = useSession();
-  const { setCurrentUserId, currentUserId } = useAppStore();
+  const { setCurrentUserId, setSubscriptions, currentUserId } = useAppStore();
   const [ready, setReady] = useState(false);
+  const syncedRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (status === "loading") return;
@@ -19,6 +21,14 @@ export function useUser() {
       const providerId = (session as any).providerId || (session as any).backendUserId || session.user?.email;
       const uid = `${provider}_${providerId}`;
       setCurrentUserId(uid);
+
+      const token = (session as any)?.accessToken;
+      if (token && syncedRef.current !== uid) {
+        syncedRef.current = uid;
+        getSubscriptions(token)
+          .then((teams) => setSubscriptions(teams))
+          .catch(() => {});
+      }
     } else if (testUser) {
       setCurrentUserId("test_1");
     } else {
@@ -26,7 +36,7 @@ export function useUser() {
     }
 
     setReady(true);
-  }, [session, status, setCurrentUserId]);
+  }, [session, status, setCurrentUserId, setSubscriptions]);
 
   const testUser = typeof window !== "undefined" ? localStorage.getItem("test-user") : null;
   const isLoggedIn = !!session || !!testUser;

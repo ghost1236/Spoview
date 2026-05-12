@@ -5,12 +5,10 @@ import kr.smiling.sportshub.scheduler.KLeagueDataScheduler
 import kr.smiling.sportshub.scheduler.MlbDataScheduler
 import kr.smiling.sportshub.scheduler.KboDataScheduler
 import kr.smiling.sportshub.security.JwtTokenProvider
-import org.springframework.context.annotation.Profile
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/v1/admin")
-@Profile("local")
 class AdminController(
     private val footballScheduler: FootballDataScheduler,
     private val kleagueScheduler: KLeagueDataScheduler,

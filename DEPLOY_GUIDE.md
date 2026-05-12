@@ -1,6 +1,6 @@
 # 스포뷰 배포 가이드
 
-> 최종 수정: 2026-05-12
+> 최종 수정: 2026-05-13
 > 구성: **Vercel (프론트엔드)** + **NCP VPC 서버 1대 (기존 API/CMS + 스포뷰 백엔드 통합)**
 
 ---
@@ -15,15 +15,17 @@
      │
      └── API 호출 ──────────→ NCP VPC 서버 (1대)
                                │
-                               ├── Nginx (80/443, SSL, Reverse Proxy)
+                               ├── Nginx (Reverse Proxy)
                                │     │
-                               │     ├── api.spoview.kr ───────→ :8090 (Spring Boot JAR, 스포뷰)
+                               │     ├── api.spoview.kr (443/SSL) ─→ :8090 (Spring Boot JAR, 스포뷰)
                                │     │
-                               │     └── smiling.kr ──── path 기반 라우팅
+                               │     └── smiling.kr (80/5580, HTTP only)
                                │           ├── /DailyFCAnyang_api/ → :8081
                                │           ├── /DailyGiants_api/   → :8082
                                │           ├── /DailyManUtd_api/   → :8083
-                               │           └── /cms/               → :8084
+                               │           ├── /cms/               → :8084
+                               │           ├── /admin/uploads/     → /home/smiling/song/ (정적 파일)
+                               │           └── /portfolio/         → /var/www/smiling/portfolio/ (정적 HTML)
                                │
                                ├── MariaDB (기존 DB + sportshub DB)
                                ├── Redis (스포뷰 캐시)
@@ -120,9 +122,10 @@ IP 대역:  10.0.0.0/16
 | 프로토콜 | 포트 | 소스 | 용도 |
 |----------|------|------|------|
 | TCP | 22 | 관리자 IP | SSH |
-| TCP | 80 | 0.0.0.0/0 | HTTP → HTTPS 리다이렉트 |
-| TCP | 443 | 0.0.0.0/0 | HTTPS |
-| TCP | 3306 | 10.0.0.0/16 | MariaDB (VPC 내부만) |
+| TCP | 80 | 0.0.0.0/0 | HTTP (smiling.kr 기존 서비스) |
+| TCP | 443 | 0.0.0.0/0 | HTTPS (api.spoview.kr) |
+| TCP | 5580 | 0.0.0.0/0 | 기존 앱 API (레거시 호환) |
+| TCP | 3306 | 관리자 IP/32 | MariaDB (외부 관리용) |
 
 > 8080, 8090 포트는 외부 노출 불필요 (Nginx가 프록시)
 
@@ -336,7 +339,45 @@ systemctl start daily-fcanyang daily-giants daily-manutd daily-cms
 
 > 스케줄러 시간을 분산 배치하여 동시 피크 회피 (01:00/02:00/03:00/04:00). DB 접속정보는 각 JAR 내부 `application-prod.yml`에 `localhost:3306`으로 설정.
 
-### D-6. 기존 서비스 동작 확인
+### D-6. 업로드 파일 마이그레이션
+
+DailyGiants, DailyFCAnyang의 업로드 파일(`/home/smiling/song/`)을 클래식 서버에서 VPC로 이전합니다.
+
+```bash
+# 클래식 서버에서 압축 (root 권한 필요)
+su - root
+tar -czf /tmp/upload_files.tar.gz -C /home/smiling song
+
+# 로컬로 다운로드
+scp -i classic-key.pem smiling@클래식IP:/tmp/upload_files.tar.gz ./
+
+# VPC로 업로드
+scp -i spoview-key.pem upload_files.tar.gz root@VPC공인IP:/tmp/
+
+# VPC 서버에서 복원
+mkdir -p /home/smiling
+tar -xzf /tmp/upload_files.tar.gz -C /home/smiling
+chmod -R 755 /home/smiling/song
+```
+
+> 파일 구조: `/home/smiling/song/giants/`, `/home/smiling/song/anyang/`
+> 앱에서 `http://smiling.kr:80/admin/uploads/giants/파일명.mp3` 형태로 접근 → Nginx에서 정적 파일 서빙
+
+**포트폴리오 사이트 (정적 HTML):**
+
+```bash
+# 클래식 서버의 Tomcat ROOT/portfolio 폴더를 압축
+tar -czf portfolio.tar.gz portfolio
+
+# VPC로 업로드 후 복원
+mkdir -p /var/www/smiling/portfolio
+tar -xzf /tmp/portfolio.tar.gz -C /var/www/smiling/
+chmod -R 755 /var/www/smiling/portfolio
+```
+
+> 접속: `http://smiling.kr:5580/portfolio/` 또는 `http://smiling.kr/portfolio/`
+
+### D-7. 기존 서비스 동작 확인
 
 ```bash
 # 각 서비스 로그 확인
@@ -457,22 +498,89 @@ server {
 NGINX
 ```
 
-### F-2. 기존 서비스 (smiling.kr → path별 분기)
+### F-2. 기존 서비스 (smiling.kr → HTTP only, SSL 불필요)
 
 ```bash
 cat > /etc/nginx/sites-available/smiling << 'NGINX'
 server {
     listen 80;
     server_name smiling.kr;
-    return 301 https://$host$request_uri;
+
+    # 포트폴리오 (정적 HTML)
+    location /portfolio/ {
+        alias /var/www/smiling/portfolio/;
+        index index.html;
+    }
+
+    # 정적 파일 서빙 (기존 앱에서 http://smiling.kr:80/admin/uploads/... 로 접근)
+    location /admin/uploads/giants/ {
+        alias /home/smiling/song/giants/;
+    }
+
+    location /admin/uploads/anyang/ {
+        alias /home/smiling/song/anyang/;
+    }
+
+    # DailyFCAnyang API → :8081
+    location /DailyFCAnyang_api/ {
+        proxy_pass http://127.0.0.1:8081;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        client_max_body_size 10M;
+    }
+
+    # DailyGiants API → :8082
+    location /DailyGiants_api/ {
+        proxy_pass http://127.0.0.1:8082;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        client_max_body_size 10M;
+    }
+
+    # DailyManUtd API → :8083
+    location /DailyManUtd_api/ {
+        proxy_pass http://127.0.0.1:8083;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        client_max_body_size 10M;
+    }
+
+    # CMS → :8084
+    location /cms/ {
+        proxy_pass http://127.0.0.1:8084;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        client_max_body_size 20M;
+    }
 }
 
+# 기존 앱 호환용 (http://smiling.kr:5580 그대로 유지)
 server {
-    listen 443 ssl http2;
+    listen 5580;
     server_name smiling.kr;
 
-    ssl_certificate /etc/letsencrypt/live/smiling.kr/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/smiling.kr/privkey.pem;
+    # 포트폴리오 (정적 HTML)
+    location /portfolio/ {
+        alias /var/www/smiling/portfolio/;
+        index index.html;
+    }
+
+    # 정적 파일 서빙
+    location /admin/uploads/giants/ {
+        alias /home/smiling/song/giants/;
+    }
+
+    location /admin/uploads/anyang/ {
+        alias /home/smiling/song/anyang/;
+    }
 
     # DailyFCAnyang API → :8081
     location /DailyFCAnyang_api/ {
@@ -528,9 +636,8 @@ rm -f /etc/nginx/sites-enabled/default
 # 설정 검증
 nginx -t
 
-# SSL 발급 (HTTP 상태에서 먼저)
-# 임시로 80 포트 설정만 활성화 후:
-certbot --nginx -d api.spoview.kr -d smiling.kr
+# SSL 발급 (api.spoview.kr만, smiling.kr은 HTTP only)
+certbot --nginx -d api.spoview.kr
 
 # Nginx 재시작
 systemctl restart nginx
@@ -544,8 +651,9 @@ systemctl restart nginx
 
 | 포트 | 서비스 | 외부 노출 |
 |------|--------|----------|
-| 80 | Nginx (HTTP → HTTPS) | O |
-| 443 | Nginx (HTTPS) | O |
+| 80 | Nginx HTTP (smiling.kr 기존 서비스) | O |
+| 443 | Nginx HTTPS (api.spoview.kr) | O |
+| 5580 | Nginx HTTP (기존 앱 호환) | O |
 | 8081 | DailyFCAnyang API | X (Nginx만) |
 | 8082 | DailyGiants API | X (Nginx만) |
 | 8083 | DailyManUtd API | X (Nginx만) |
@@ -627,10 +735,12 @@ module.exports = {
 
 | 순서 | 확인 사항 | 방법 |
 |------|----------|------|
-| 1 | 기존 API 동작 | `curl https://smiling.kr/DailyFCAnyang_api/health` |
-| 1-1 | 기존 API 동작 | `curl https://smiling.kr/DailyGiants_api/health` |
-| 1-2 | 기존 API 동작 | `curl https://smiling.kr/DailyManUtd_api/health` |
-| 1-3 | CMS 동작 | `curl https://smiling.kr/cms/health` |
+| 1 | 기존 API 동작 | `curl http://smiling.kr/DailyFCAnyang_api/` |
+| 1-1 | 기존 API 동작 | `curl http://smiling.kr/DailyGiants_api/` |
+| 1-2 | 기존 API 동작 | `curl http://smiling.kr/DailyManUtd_api/` |
+| 1-3 | CMS 동작 | `curl http://smiling.kr/cms/` |
+| 1-4 | 기존 앱 호환 | `curl http://smiling.kr:5580/DailyManUtd_api/` |
+| 1-5 | 파일 서빙 | `curl -I http://smiling.kr/admin/uploads/giants/테스트파일.mp3` |
 | 2 | 스포뷰 백엔드 동작 | `curl https://api.spoview.kr/actuator/health` |
 | 3 | Vercel 프론트 실행 | `https://spoview.kr` 접속 |
 | 4 | API 프록시 연결 | `https://spoview.kr/api/v1/leagues` |
@@ -699,10 +809,10 @@ systemctl status daily-cms --no-pager
 
 echo "=== 배포 완료 ==="
 echo "스포뷰:    $(curl -s https://api.spoview.kr/actuator/health)"
-echo "FCAnyang:  $(curl -s https://smiling.kr/DailyFCAnyang_api/health)"
-echo "Giants:    $(curl -s https://smiling.kr/DailyGiants_api/health)"
-echo "ManUtd:    $(curl -s https://smiling.kr/DailyManUtd_api/health)"
-echo "CMS:       $(curl -s https://smiling.kr/cms/health)"
+echo "FCAnyang:  $(curl -s -o /dev/null -w '%{http_code}' http://smiling.kr/DailyFCAnyang_api/)"
+echo "Giants:    $(curl -s -o /dev/null -w '%{http_code}' http://smiling.kr/DailyGiants_api/)"
+echo "ManUtd:    $(curl -s -o /dev/null -w '%{http_code}' http://smiling.kr/DailyManUtd_api/)"
+echo "CMS:       $(curl -s -o /dev/null -w '%{http_code}' http://smiling.kr/cms/)"
 ```
 
 ---
@@ -763,17 +873,19 @@ systemctl restart nginx
 
 | 순서 | 작업 | 완료 |
 |------|------|------|
-| 1 | VPC + 서브넷 + ACG 생성 | ☐ |
-| 2 | VPC 서버 생성 + 공인 IP 할당 | ☐ |
-| 3 | 기본 패키지 설치 (Java, Nginx, MariaDB, Redis) | ☐ |
-| 4 | 클래식 DB 덤프 → VPC로 복원 | ☐ |
-| 5 | 기존 서비스 JAR 빌드 + 배포 + DB 접속정보 변경 | ☐ |
-| 7 | 기존 서비스 동작 확인 | ☐ |
-| 8 | 스포뷰 백엔드 배포 | ☐ |
-| 9 | Nginx 통합 설정 + SSL 발급 | ☐ |
-| 10 | DNS 레코드 VPC 공인 IP로 변경 | ☐ |
-| 11 | 전체 서비스 통합 테스트 | ☐ |
-| 12 | 클래식 서버 중지 (확인 후) | ☐ |
+| 1 | VPC + 서브넷 + ACG 생성 | ✅ |
+| 2 | VPC 서버 생성 + 공인 IP 할당 | ✅ |
+| 3 | 기본 패키지 설치 (Java, Nginx, MariaDB, Redis) | ✅ |
+| 4 | 클래식 DB 덤프 → VPC로 복원 | ✅ |
+| 5 | 기존 서비스 JAR 빌드 + 배포 | ✅ |
+| 6 | 업로드 파일 마이그레이션 (/home/smiling/song/) | ✅ |
+| 7 | 기존 서비스 동작 확인 | ✅ |
+| 8 | 스포뷰 백엔드 배포 | ✅ |
+| 9 | Nginx 통합 설정 (80/5580 + 파일 서빙) | ✅ |
+| 10 | SSL 발급 (api.spoview.kr만) | ✅ |
+| 11 | DNS 레코드 VPC 공인 IP로 변경 | ✅ |
+| 12 | 전체 서비스 통합 테스트 | ✅ |
+| 13 | 클래식 서버 중지 (확인 후) | ✅ 중지 완료, 1~2주 후 반납 |
 
 ---
 
