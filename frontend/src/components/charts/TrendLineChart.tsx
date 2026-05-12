@@ -100,7 +100,7 @@ export function TrendLineChart({ data, yLabel = "누적 득실" }: Props) {
               cornerRadius: 8,
               displayColors: true,
               callbacks: {
-                label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y >= 0 ? "+" : ""}${ctx.parsed.y}`,
+                label: (ctx) => `${ctx.dataset.label}: ${(ctx.parsed.y ?? 0) >= 0 ? "+" : ""}${ctx.parsed.y ?? 0}`,
               },
             },
           },
