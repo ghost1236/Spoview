@@ -11,7 +11,6 @@ export function ThemeToggle() {
   if (!mounted) return <div className="w-8 h-8" />;
 
   return (
-    {/* hover 배경을 CSS 변수로 처리해요 — dark: 접두사 없이도 테마 전환이 돼요 */}
     <button
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
       className="p-2 rounded-lg transition"

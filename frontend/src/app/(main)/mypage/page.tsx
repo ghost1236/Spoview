@@ -96,7 +96,6 @@ export default function MyPage() {
         ) : (
           <div className="space-y-2">
             {localSubscriptions.map((team) => (
-              {/* 구독 팀 항목 사이 구분선 색상을 CSS 변수로 처리해요 */}
               <div key={team.teamCode} className="flex items-center justify-between py-2 border-b last:border-0" style={{ borderColor: "var(--border)" }}>
                 <div className="flex items-center gap-3">
                   <TeamLogo teamCode={team.teamCode} name={team.nameKo} size={32} />
@@ -117,8 +116,6 @@ export default function MyPage() {
 
       {/* 로그아웃 */}
       {isLoggedIn && (
-        {/* 로그아웃 버튼: 테두리와 hover 배경을 CSS 변수 + inline style로 처리해요
-            dark: 접두사 대신 CSS 변수를 써야 다크모드에서 제대로 보여요 */}
         <button
           onClick={() => signOut({ callbackUrl: "/login" })}
           className="w-full py-3 rounded-xl text-sm font-semibold text-rose-500 border transition hover:opacity-80"
@@ -174,7 +171,6 @@ function NotifSettingsSection() {
       </div>
       <div className="space-y-3">
         {NOTIF_ITEMS.map(item => (
-          {/* 알림 설정 항목 사이 구분선도 CSS 변수로 처리해요 */}
           <div key={item.key} className="flex items-center justify-between py-2 border-b last:border-0" style={{ borderColor: "var(--border)" }}>
             <div>
               <div className="text-sm font-semibold">{item.title}</div>

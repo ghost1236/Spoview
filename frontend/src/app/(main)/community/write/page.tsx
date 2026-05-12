@@ -142,7 +142,6 @@ export default function WritePostPage() {
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading || images.length >= 5}
-            {/* 이미지 첨부 버튼 — 테두리와 배경을 CSS 변수로 지정해요 */}
             className="flex items-center gap-2 px-4 py-2 rounded-lg border text-sm disabled:opacity-50"
             style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--text)" }}
           >
@@ -157,7 +156,6 @@ export default function WritePostPage() {
         {images.length > 0 && (
           <div className="flex gap-2 overflow-x-auto">
             {images.map((img) => (
-              {/* 첨부된 이미지 미리보기 썸네일 — 테두리를 CSS 변수로 지정해요 */}
               <div key={img.id} className="relative shrink-0 w-24 h-24 rounded-lg overflow-hidden border" style={{ borderColor: "var(--border)" }}>
                 <img src={`${process.env.NEXT_PUBLIC_API_URL || ""}${img.url}`} alt={img.fileName} className="w-full h-full object-cover" />
                 <button
@@ -175,7 +173,6 @@ export default function WritePostPage() {
       <div className="flex justify-end gap-2">
         <button
           onClick={() => router.back()}
-          {/* 취소 버튼 — 테두리를 CSS 변수로 지정해요 */}
           className="px-4 py-2 rounded-lg border text-sm"
           style={{ borderColor: "var(--border)", color: "var(--text)" }}
         >
