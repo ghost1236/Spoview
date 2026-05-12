@@ -109,7 +109,7 @@ export function HeadToHeadChart({ teamMatchesMap, teams }: Props) {
           aspectRatio: 2.5,
           scales: {
             x: {
-              ticks: { color: isDark ? "#CBD5E1" : "#475569", font: { size: 11, weight: "600" } },
+              ticks: { color: isDark ? "#CBD5E1" : "#475569", font: { size: 11, weight: 600 } },
               grid: { display: false },
               border: { color: isDark ? "#334155" : "#E2E8F0" },
             },
@@ -130,7 +130,7 @@ export function HeadToHeadChart({ teamMatchesMap, teams }: Props) {
                 usePointStyle: true,
                 pointStyle: "rectRounded",
                 padding: 16,
-                font: { size: 12, weight: "600" },
+                font: { size: 12, weight: 600 },
               },
             },
             tooltip: {
