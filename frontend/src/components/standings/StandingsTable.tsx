@@ -99,7 +99,6 @@ export function StandingsTable({ standings, sportType, highlightTeamCodes = [] }
             const zone = ZONE_COLORS[z];
             if (!zone) return null;
             return (
-              {/* 각 존의 색상 점 + 라벨 — 텍스트 색을 CSS 변수로 지정해요 */}
               <div key={z} className="flex items-center gap-1.5 text-xs" style={{ color: "var(--text-secondary)" }}>
                 <div className="w-3 h-3 rounded" style={{ backgroundColor: zone.color }} />
                 {zone.label}
