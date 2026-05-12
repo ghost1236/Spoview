@@ -10,6 +10,7 @@ data class PostListResponse(
     val category: String,
     val title: String,
     val authorNickname: String,
+    val authorFanLevel: Int,
     val likeCount: Int,
     val viewCount: Int,
     val commentCount: Long,
@@ -22,6 +23,7 @@ data class PostListResponse(
             category = post.category.name,
             title = post.title,
             authorNickname = post.user.nickname,
+            authorFanLevel = post.user.fanLevel,
             likeCount = post.likeCount,
             viewCount = post.viewCount,
             commentCount = commentCount,
@@ -45,6 +47,7 @@ data class PostDetailResponse(
     val authorId: Long,
     val authorNickname: String,
     val authorProfileImg: String?,
+    val authorFanLevel: Int,
     val likeCount: Int,
     val viewCount: Int,
     val isLiked: Boolean,
@@ -58,6 +61,7 @@ data class CommentResponse(
     val content: String,
     val authorNickname: String,
     val authorProfileImg: String?,
+    val authorFanLevel: Int,
     val likeCount: Int,
     val isLiked: Boolean,
     val replies: List<CommentResponse>,
@@ -70,6 +74,7 @@ data class CommentResponse(
                 content = comment.content,
                 authorNickname = comment.user.nickname,
                 authorProfileImg = comment.user.profileImg,
+                authorFanLevel = comment.user.fanLevel,
                 likeCount = comment.likeCount,
                 isLiked = isLiked,
                 replies = replies,
@@ -77,12 +82,3 @@ data class CommentResponse(
             )
     }
 }
-
-data class PredictionResponse(
-    val matchId: Long,
-    val totalVotes: Long,
-    val homeVotes: Long,
-    val drawVotes: Long,
-    val awayVotes: Long,
-    val myPrediction: String?
-)

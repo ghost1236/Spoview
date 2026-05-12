@@ -13,26 +13,37 @@ data class AuthResponse(val token: String, val userId: Long, val nickname: Strin
 @Service
 class AuthService(
     private val userRepository: UserRepository,
-    private val jwtTokenProvider: JwtTokenProvider
+    private val jwtTokenProvider: JwtTokenProvider,
+    private val fanLevelService: FanLevelService
 ) {
     @Transactional
     fun loginOrRegister(request: LoginRequest): AuthResponse {
         val provider = AuthProvider.valueOf(request.provider.uppercase())
+        var isNewUser = false
         val user = userRepository.findByProviderAndProviderId(provider, request.providerId)
-            ?: userRepository.save(
-                User(
-                    email = request.email.ifBlank { null },
-                    nickname = request.nickname,
-                    profileImg = request.profileImg,
-                    provider = provider,
-                    providerId = request.providerId
+            ?: run {
+                isNewUser = true
+                userRepository.save(
+                    User(
+                        email = request.email.ifBlank { null },
+                        nickname = request.nickname,
+                        profileImg = request.profileImg,
+                        provider = provider,
+                        providerId = request.providerId
+                    )
                 )
-            )
+            }
 
         // 이메일이 나중에 들어오면 업데이트
         if (user.email == null && request.email.isNotBlank()) {
             user.email = request.email
         }
+
+        // 포인트 적립
+        if (isNewUser) {
+            fanLevelService.recordActivity(user.id, kr.smiling.sportshub.domain.user.ActivityType.SIGNUP)
+        }
+        fanLevelService.recordLogin(user.id)
 
         val token = jwtTokenProvider.generateToken(user.id, user.email ?: "")
         return AuthResponse(token = token, userId = user.id, nickname = user.nickname)

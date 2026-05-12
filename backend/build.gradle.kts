@@ -54,10 +54,18 @@ dependencies {
     // Jsoup (KBO 크롤링)
     implementation("org.jsoup:jsoup:1.18.3")
 
+    // Web Push (VAPID)
+    implementation("nl.martijndwars:web-push:5.1.1")
+    implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
+
+    // Naver Cloud Object Storage (S3 호환)
+    implementation("software.amazon.awssdk:s3:2.25.60")
+
     // Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    testImplementation("io.mockk:mockk:1.13.13")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

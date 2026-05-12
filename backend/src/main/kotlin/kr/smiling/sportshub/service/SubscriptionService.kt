@@ -14,7 +14,8 @@ import org.springframework.transaction.annotation.Transactional
 class SubscriptionService(
     private val subscriptionRepository: UserTeamSubscriptionRepository,
     private val userRepository: UserRepository,
-    private val teamRepository: TeamRepository
+    private val teamRepository: TeamRepository,
+    private val fanLevelService: FanLevelService
 ) {
     @Transactional(readOnly = true)
     fun getSubscriptions(userId: Long): List<TeamResponse> {
@@ -31,6 +32,7 @@ class SubscriptionService(
         val team = teamRepository.findByTeamCode(teamCode) ?: throw BusinessException(ErrorCode.TEAM_NOT_FOUND)
 
         subscriptionRepository.save(UserTeamSubscription(user = user, team = team))
+        fanLevelService.recordActivity(userId, kr.smiling.sportshub.domain.user.ActivityType.TEAM_SUBSCRIBE)
         return TeamResponse.from(team)
     }
 

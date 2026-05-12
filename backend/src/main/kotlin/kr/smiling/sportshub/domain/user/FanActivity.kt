@@ -27,12 +27,17 @@ class FanActivity(
     val createdAt: LocalDateTime = LocalDateTime.now()
 )
 
-enum class ActivityType {
-    POST,       // 게시글 작성 +5
-    COMMENT,    // 댓글 작성 +2
-    LIKE,       // 좋아요 +1
-    PREDICTION, // 예측 참여 +3
-    LOGIN       // 일일 로그인 +1
+enum class ActivityType(val defaultPoints: Int) {
+    POST(5),              // 게시글 작성
+    COMMENT(2),           // 댓글 작성
+    LIKE(1),              // 좋아요
+    LOGIN(1),             // 일일 로그인
+    SIGNUP(50),            // 회원가입
+    LOGIN_STREAK(3),       // 연속 로그인 7일 보너스
+    LIKE_MILESTONE(10),    // 좋아요 10개 받음
+    FIRST_POST(20),        // 첫 게시글 작성
+    TEAM_SUBSCRIBE(5),     // 팀 구독 추가
+    MATCH_CHECKIN(3),      // 경기 관전 체크인
 }
 
 interface FanActivityRepository : JpaRepository<FanActivity, Long> {

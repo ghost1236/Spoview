@@ -76,6 +76,7 @@ class PostService(
             authorId = post.user.id,
             authorNickname = post.user.nickname,
             authorProfileImg = post.user.profileImg,
+            authorFanLevel = post.user.fanLevel,
             likeCount = post.likeCount,
             viewCount = post.viewCount,
             isLiked = isLiked,
@@ -105,6 +106,7 @@ class PostService(
         }
 
         fanLevelService.recordActivity(userId, ActivityType.POST)
+        fanLevelService.checkFirstPost(userId)
         return post.id
     }
 
@@ -139,6 +141,7 @@ class PostService(
             likeRepository.save(Like(user = user, targetType = TargetType.POST, targetId = postId))
             post.likeCount++
             fanLevelService.recordActivity(userId, ActivityType.LIKE)
+            fanLevelService.checkLikeMilestone(post.user.id, post.likeCount)
             true
         }
     }

@@ -7,7 +7,7 @@ CREATE TABLE users (
     email VARCHAR(255) UNIQUE,
     nickname VARCHAR(50) NOT NULL,
     profile_img VARCHAR(500),
-    provider ENUM('KAKAO','GOOGLE') NOT NULL,
+    provider ENUM('KAKAO','NAVER','GOOGLE') NOT NULL,
     provider_id VARCHAR(100) NOT NULL,
     fan_level INT NOT NULL DEFAULT 1,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

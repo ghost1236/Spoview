@@ -27,10 +27,14 @@ class User(
     val providerId: String,
 
     @Column(nullable = false)
-    var fanLevel: Int = 1
+    var fanLevel: Int = 1,
+
+    @Column(nullable = false)
+    var totalPoints: Int = 0
 ) : BaseEntity()
 
 enum class AuthProvider {
     KAKAO,
+    NAVER,
     GOOGLE
 }

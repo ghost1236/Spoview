@@ -33,7 +33,3 @@ data class CreateCommentRequest(
     @field:NotBlank val content: String,
     val parentId: Long? = null
 )
-
-data class PredictRequest(
-    val prediction: String  // HOME, DRAW, AWAY
-)

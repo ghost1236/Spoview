@@ -28,6 +28,21 @@ spring:
 
 server:
   port: 8090
+
+ncloud:
+  object-storage:
+    endpoint: https://kr.object.ncloudstorage.com
+    region: kr-standard
+    access-key: ${NCLOUD_ACCESS_KEY:}
+    secret-key: ${NCLOUD_SECRET_KEY:}
+    bucket: ${NCLOUD_BUCKET:sportshub-images}
+    cdn-url: ${NCLOUD_CDN_URL:}
+
+webpush:
+  vapid:
+    public-key: ${VAPID_PUBLIC_KEY:}
+    private-key: ${VAPID_PRIVATE_KEY:}
+    subject: mailto:smiling1236@gmail.com
   shutdown: graceful
 
 logging:

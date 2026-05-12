@@ -22,8 +22,3 @@ interface LikeRepository : JpaRepository<Like, Long> {
     fun existsByUser_IdAndTargetTypeAndTargetId(userId: Long, targetType: TargetType, targetId: Long): Boolean
 }
 
-interface MatchPredictionRepository : JpaRepository<MatchPrediction, Long> {
-    fun findByMatch_IdAndUser_Id(matchId: Long, userId: Long): MatchPrediction?
-    fun countByMatch_IdAndPrediction(matchId: Long, prediction: PredictionChoice): Long
-    fun countByMatch_Id(matchId: Long): Long
-}

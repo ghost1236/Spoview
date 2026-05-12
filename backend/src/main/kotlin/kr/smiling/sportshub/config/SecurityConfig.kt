@@ -4,6 +4,9 @@ import kr.smiling.sportshub.security.JwtAuthFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
+import com.fasterxml.jackson.databind.ObjectMapper
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
@@ -25,6 +28,19 @@ class SecurityConfig(
             .cors { it.configurationSource(corsConfigurationSource()) }
             .csrf { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
+            .exceptionHandling { ex ->
+                val mapper = ObjectMapper()
+                ex.authenticationEntryPoint { _, response, _ ->
+                    response.status = HttpStatus.UNAUTHORIZED.value()
+                    response.contentType = MediaType.APPLICATION_JSON_VALUE
+                    response.writer.write(mapper.writeValueAsString(mapOf("code" to "UNAUTHORIZED", "message" to "인증이 필요합니다")))
+                }
+                ex.accessDeniedHandler { _, response, _ ->
+                    response.status = HttpStatus.FORBIDDEN.value()
+                    response.contentType = MediaType.APPLICATION_JSON_VALUE
+                    response.writer.write(mapper.writeValueAsString(mapOf("code" to "FORBIDDEN", "message" to "권한이 없습니다")))
+                }
+            }
             .authorizeHttpRequests { auth ->
                 auth
                     // 공개 API
@@ -37,6 +53,7 @@ class SecurityConfig(
                     .requestMatchers("/api/v1/admin/**").permitAll()
                     .requestMatchers("/actuator/health").permitAll()
                     .requestMatchers("/uploads/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/v1/notifications/vapid-key").permitAll()
                     // 인증 필요
                     .anyRequest().authenticated()
             }
