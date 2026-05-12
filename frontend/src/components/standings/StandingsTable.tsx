@@ -55,7 +55,7 @@ export function StandingsTable({ standings, sportType, highlightTeamCodes = [] }
                   style={{
                     borderColor: "var(--border)",
                     // 하이라이트 배경: 다크모드에서는 --surface-2를 블루 계열로 쓰면 충분해요
-                    background: isHighlighted ? "color-mix(in srgb, #3b82f6 12%, var(--surface))" : undefined,
+                    background: isHighlighted ? "var(--surface-2)" : undefined,
                   }}
                 >
                   <td className="py-2 px-0">

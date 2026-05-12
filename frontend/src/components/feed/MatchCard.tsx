@@ -13,7 +13,6 @@ export function MatchCard({ match }: Props) {
   const isFinished = match.status === "FINISHED";
 
   return (
-    {/* 카드 배경과 테두리를 CSS 변수로 처리해요 (라이트/다크 자동 전환) */}
     <div className="rounded-lg p-4 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
       <div className="flex items-center justify-between mb-3">
         <span className="text-[10px] text-slate-400">{formatDate(match.matchDate)}</span>

@@ -40,8 +40,7 @@ export function Header() {
   ];
 
   return (
-    {/* 헤더 배경은 CSS 변수 --bg를 반투명하게 적용해 다크모드에서도 자연스럽게 보여요 */}
-    <header className="sticky top-0 z-50 backdrop-blur-xl border-b" style={{ background: "color-mix(in srgb, var(--bg) 80%, transparent)", borderColor: "var(--border)" }}>
+    <header className="sticky top-0 z-50 backdrop-blur-xl border-b" style={{ background: "var(--bg)", borderColor: "var(--border)" }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="h-14 flex items-center justify-between">
           {/* 로고 */}
