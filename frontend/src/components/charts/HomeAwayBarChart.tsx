@@ -78,7 +78,7 @@ export function HomeAwayBarChart({ data }: Props) {
             },
             y: {
               stacked: true,
-              ticks: { color: isDark ? "#CBD5E1" : "#475569", font: { size: 12, weight: "600" } },
+              ticks: { color: isDark ? "#CBD5E1" : "#475569", font: { size: 12, weight: 600 } },
               grid: { display: false },
               border: { color: isDark ? "#334155" : "#E2E8F0" },
             },

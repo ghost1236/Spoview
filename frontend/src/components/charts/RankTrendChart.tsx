@@ -134,7 +134,7 @@ export function RankTrendChart({ teamMatchesMap, standingsMap, teams }: Props) {
                 usePointStyle: true,
                 pointStyle: "circle",
                 padding: 16,
-                font: { size: 12, weight: "600" },
+                font: { size: 12, weight: 600 },
               },
             },
             tooltip: {

@@ -98,7 +98,7 @@ export function PointsProgressChart({ teamMatchesMap, teams }: Props) {
                 usePointStyle: true,
                 pointStyle: "circle",
                 padding: 16,
-                font: { size: 12, weight: "600" },
+                font: { size: 12, weight: 600 },
               },
             },
             tooltip: {
